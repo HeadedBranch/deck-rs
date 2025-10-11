@@ -8,13 +8,13 @@ pub struct Deck {
     shuffled: bool,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct Card {
     value: CardValue,
     suit: Suit,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Ord, PartialOrd, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Ord, PartialOrd, Debug, Hash)]
 pub enum CardValue {
     Ace,
     Two,
@@ -31,7 +31,7 @@ pub enum CardValue {
     King,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum Suit {
     Hearts,
     Diamonds,
@@ -65,6 +65,9 @@ impl Deck {
         deck.deck.shuffle(&mut rng);
         deck.shuffled = true;
         deck
+    }
+    pub fn new_custom (deck: Vec<Card>) -> Deck {
+        Deck { deck, shuffled: false }
     }
     pub fn shuffle(&mut self) {
         self.shuffled = true;
@@ -115,11 +118,8 @@ mod tests {
     fn deck_order() {
         let deck = Deck::new();
         assert_eq!(
-            deck.deck[0],
-            Card {
-                value: Ace,
-                suit: Spades
-            }
+            deck.deck,
+            vec![Card::new(Ace, Spades),Card::new(Two, Spades)]
         );
     }
 }
