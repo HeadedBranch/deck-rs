@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use crate::CardValue::*;
 use crate::Suit::*;
 use rand::rng;
@@ -37,6 +38,52 @@ pub enum Suit {
     Diamonds,
     Clubs,
     Spades,
+}
+
+impl Display for Deck {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for i in self.deck.iter() {
+            write!(f, "{}", i)?;
+        }
+        Ok(())
+    }
+}
+
+impl Display for Card {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}{}", self.value, self.suit)
+    }
+}
+
+impl Display for CardValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", match self {
+            Ace => "A",
+            Two => "2",
+            Three => "3",
+            Four => "4",
+            Five => "5",
+            Six => "6",
+            Seven => "7",
+            Eight => "8",
+            Nine => "9",
+            Ten => "10",
+            Jack => "J",
+            Queen => "Q",
+            King => "K",
+        })
+    }
+}
+
+impl Display for Suit {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", match self {
+            Hearts => "H",
+            Diamonds => "D",
+            Clubs => "C",
+            Spades => "S",
+        })
+    }
 }
 
 impl Deck {
@@ -115,11 +162,9 @@ mod tests {
         assert_eq!(deck.deck.len(), 52)
     }
     #[test]
-    fn deck_order() {
-        let deck = Deck::new();
-        assert_eq!(
-            deck.deck,
-            vec![Card::new(Ace, Spades),Card::new(Two, Spades)]
-        );
+    fn card_value_printing() {
+        assert_eq!(format!("{}", Card::new(Ace, Spades)), "AS");
+        assert_eq!(format!("{}", Card::new(Ace, Hearts)), "AH");
+        assert_eq!(format!("{}", Card::new(Two, Spades)), "2S");
     }
 }
