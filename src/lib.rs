@@ -40,6 +40,38 @@ pub enum Suit {
     Spades,
 }
 
+impl From<char> for Suit {
+    fn from(char: char) -> Suit {
+        match char {
+            'H' => Hearts,
+            'D' => Diamonds,
+            'C' => Clubs,
+            'S' => Spades,
+            _ => Spades,
+        }
+    }
+}
+
+impl From<char> for CardValue {
+    fn from(char: char) -> CardValue {
+        match char {
+            'A' => Ace,
+            '2' => Two,
+            '3' => Three,
+            '4' => Four,
+            '5' => Five,
+            '6' => Six,
+            '7' => Seven,
+            '8' => Eight,
+            '9' => Nine,
+            'T' => Ten,
+            'J' => Jack,
+            'Q' => Queen,
+            'K' => King,
+            _ => Ace,
+        }
+    }
+}
 impl Display for Deck {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for i in self.deck.iter() {
@@ -116,6 +148,18 @@ impl Deck {
     pub fn new_custom (deck: Vec<Card>) -> Deck {
         Deck { deck, shuffled: false }
     }
+    pub fn from_str(input: &str) -> Option<Deck> {
+        let mut deck = Vec::new();
+        let mut input = input.bytes();
+        loop {
+            let rank: char = input.next()?.into();
+            let suit: char = input.next()?.into();
+            deck.push(Card::new(rank.into(), suit.into()));
+            if input.len() == 0 {
+                break Some(Deck { deck, shuffled: true })
+            }
+        }
+    }
     pub fn shuffle(&mut self) {
         self.shuffled = true;
         let mut rng = rng();
@@ -166,5 +210,12 @@ mod tests {
         assert_eq!(format!("{}", Card::new(Ace, Spades)), "AS");
         assert_eq!(format!("{}", Card::new(Ace, Hearts)), "AH");
         assert_eq!(format!("{}", Card::new(Two, Spades)), "2S");
+    }
+    #[test]
+    fn deck_from_string() {
+        let deck = Deck::from_str("AS2C5D").unwrap();
+        assert_eq!(deck.deck[0], Card::new(Ace, Spades));
+        assert_eq!(deck.deck[1], Card::new(Two, Clubs));
+        assert_eq!(deck.deck[2], Card::new(Five, Diamonds));
     }
 }
