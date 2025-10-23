@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use std::str::FromStr;
 use crate::CardValue::*;
 use crate::Suit::*;
 use rand::rng;
@@ -99,7 +100,7 @@ impl Display for CardValue {
             Seven => "7",
             Eight => "8",
             Nine => "9",
-            Ten => "10",
+            Ten => "T",
             Jack => "J",
             Queen => "Q",
             King => "K",
@@ -118,6 +119,33 @@ impl Display for Suit {
     }
 }
 
+impl Default for Deck {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl FromStr for Deck {
+    type Err = String;
+    fn from_str(input: &str) -> Result<Deck, Self::Err> {
+        let mut deck = Vec::new();
+        let mut input = input.bytes();
+        loop {
+            let rank: char = match input.next(){
+                Some(b) => b.into(),
+                None => Err(String::from("Invalid rank in deck"))?,
+            };
+            let suit: char = match input.next(){
+                Some(b) => b.into(),
+                None => Err(String::from("Invalid Suit in deck"))?,
+            };
+            deck.push(Card::new(rank.into(), suit.into()));
+            if input.len() == 0 {
+                break Ok(Deck { deck, shuffled: true })
+            }
+        }
+    }
+}
+
 impl Deck {
     pub fn new() -> Deck {
         let mut deck = Vec::new();
@@ -125,11 +153,11 @@ impl Deck {
         const VALUES: [CardValue; 13] = [
             Ace, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King,
         ];
-        for a in 0..4 {
+        for (a, item) in SUITS.iter().enumerate() {
             for b in 0..13 {
                 deck.push(Card {
                     value: if a <= 2 { VALUES[b] } else { VALUES[12 - b] },
-                    suit: SUITS[a],
+                    suit: *item,
                 })
             }
         }
@@ -147,18 +175,6 @@ impl Deck {
     }
     pub fn new_custom (deck: Vec<Card>) -> Deck {
         Deck { deck, shuffled: false }
-    }
-    pub fn from_str(input: &str) -> Option<Deck> {
-        let mut deck = Vec::new();
-        let mut input = input.bytes();
-        loop {
-            let rank: char = input.next()?.into();
-            let suit: char = input.next()?.into();
-            deck.push(Card::new(rank.into(), suit.into()));
-            if input.len() == 0 {
-                break Some(Deck { deck, shuffled: true })
-            }
-        }
     }
     pub fn shuffle(&mut self) {
         self.shuffled = true;
@@ -195,10 +211,10 @@ mod tests {
     fn shuffled_values() {
         let mut deck = Deck::new();
         let shuffled_deck = Deck::new_shuffled();
-        assert_eq!(deck.shuffled, false);
-        assert_eq!(shuffled_deck.shuffled, true);
+        assert!(!deck.shuffled);
+        assert!(shuffled_deck.shuffled);
         deck.shuffle();
-        assert_eq!(deck.shuffled, true);
+        assert!(deck.shuffled);
     }
     #[test]
     fn deck_size() {
@@ -213,9 +229,10 @@ mod tests {
     }
     #[test]
     fn deck_from_string() {
-        let deck = Deck::from_str("AS2C5D").unwrap();
+        let deck:Deck = "AS2C5DTH".parse().unwrap();
         assert_eq!(deck.deck[0], Card::new(Ace, Spades));
         assert_eq!(deck.deck[1], Card::new(Two, Clubs));
         assert_eq!(deck.deck[2], Card::new(Five, Diamonds));
+        assert_eq!(deck.deck[3], Card::new(Ten, Hearts));
     }
 }
